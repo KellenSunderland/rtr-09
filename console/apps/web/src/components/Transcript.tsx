@@ -4,7 +4,11 @@ import type { TranscriptEntry } from "../lib/sessionState";
 /** All text is rendered as React text nodes (escaped); never as HTML. */
 export function Transcript({ entries }: { entries: TranscriptEntry[] }) {
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => end.current?.scrollIntoView?.({ block: "nearest" }), [entries]);
+  useEffect(() => {
+    // scrollIntoView returns a Promise in current Chrome. useEffect would treat that
+    // return value as a cleanup function and crash the session page.
+    end.current?.scrollIntoView?.({ block: "nearest" });
+  }, [entries]);
   return (
     <section className="panel transcript" aria-label="Transcript">
       <h3>Transcript</h3>
