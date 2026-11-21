@@ -5,6 +5,19 @@ import { Transcript } from "./Transcript";
 import { Scoreboard } from "./Scoreboard";
 
 describe("Transcript", () => {
+  it("does not treat scrollIntoView's promise as an effect cleanup", () => {
+    const original = HTMLElement.prototype.scrollIntoView;
+    HTMLElement.prototype.scrollIntoView = (() => Promise.resolve()) as typeof original;
+    try {
+      const view = render(
+        <Transcript entries={[{ key: "1", role: "user", text: "hello", partial: false }]} />,
+      );
+      expect(() => view.unmount()).not.toThrow();
+    } finally {
+      HTMLElement.prototype.scrollIntoView = original;
+    }
+  });
+
   it("renders hostile text as inert text, not HTML", () => {
     const evil = '<img src=x onerror="alert(1)"><script>alert(2)</script>';
     const { container } = render(
